@@ -3,17 +3,31 @@
     <span v-if="page === null" class="DotsHolder">
       <icon-pagination-dots class="Dots" />
     </span>
-    <button
-      v-else
-      class="Page"
-      type="button"
-      :aria-label="`Go to page ${page}`"
-      :class="{ 'Page-active': isActive }"
-      :style="`background-color: ${isActive ? activeColor : 'transparent'};`"
-      @click="clickHandler"
-    >
-      {{ page }}
-    </button>
+    <span v-else>
+      <a
+        v-if="!isActive"
+        :href="href"
+        class="Page"
+        type="button"
+        :aria-label="`Go to page ${page}`"
+        :class="{ 'Page-active': isActive }"
+        :style="`background-color: ${isActive ? activeColor : 'transparent'};`"
+        @click.prevent="clickHandler"
+      >
+        {{ page }}
+      </a>
+      <button
+        v-else
+        class="Page"
+        type="button"
+        :aria-label="`Go to page ${page}`"
+        :class="{ 'Page-active': isActive }"
+        :style="`background-color: ${isActive ? activeColor : 'transparent'};`"
+        @click.prevent="clickHandler"
+      >
+        {{ page }}
+      </button>
+    </span>
   </li>
 </template>
 
@@ -37,8 +51,44 @@ export default defineComponent({
       type: String,
       default: '#DCEDFF',
     },
+    currentUrl: {
+      type: String,
+      default: '',
+    },
   },
   emits: ['update'],
+
+  methods: {
+    removeURLParameter(url: any, parameter: any) {
+      //prefer to use l.search if you have a location/link object
+      const urlparts = url.split('?');
+      if (urlparts.length >= 2) {
+        const prefix = encodeURIComponent(parameter) + '=';
+        const pars = urlparts[1].split(/[&;]/g);
+
+        //reverse iteration as may be destructive
+        for (let i = pars.length; i-- > 0; ) {
+          //idiom for string.startsWith
+          if (pars[i].lastIndexOf(prefix, 0) !== -1) {
+            pars.splice(i, 1);
+          }
+        }
+
+        return urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : '');
+      }
+      return url;
+    },
+  },
+
+  computed: {
+    href(): any {
+      if (this.page != 1) {
+        return this.currentUrl.replace(/(page=)[^\&]+/, '$1' + this.page);
+      } else {
+        return this.removeURLParameter(this.currentUrl, 'page');
+      }
+    },
+  },
 
   setup(props, { emit }) {
     const isActive = computed(() => {
@@ -100,3 +150,6 @@ export default defineComponent({
   fill: $grey_01;
 }
 </style>
+
+
+
