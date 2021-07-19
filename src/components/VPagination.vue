@@ -1,6 +1,6 @@
 <template>
   <ul class="Pagination">
-    <li v-if="!hideFirstButton" class="PaginationControl">
+    <!-- <li v-if="!hideFirstButton" class="PaginationControl">
       <icon-page-first
         class="Control"
         :class="{ 'Control-active': isPrevControlsActive }"
@@ -13,16 +13,17 @@
         :class="{ 'Control-active': isPrevControlsActive }"
         @click="goToPrev"
       />
-    </li>
+    </li> -->
     <v-page
       v-for="page in pagination"
       :key="`pagination-page-${page}`"
       :page="page"
       :current="modelValue"
       :active-color="activeColor"
+      :currentUrl="currentUrl"
       @update="updatePageHandler"
     />
-    <li class="PaginationControl">
+    <!-- <li class="PaginationControl">
       <icon-chevron-right
         class="Control"
         :class="{ 'Control-active': isNextControlsActive }"
@@ -35,21 +36,23 @@
         :class="{ 'Control-active': isNextControlsActive }"
         @click="goToLast"
       />
-    </li>
+    </li> -->
   </ul>
 </template>
+
+
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import VPage from './atoms/VPage.vue';
-import IconPageFirst from '../assets/icons/page-first.svg';
-import IconPageLast from '../assets/icons/page-last.svg';
-import IconChevronLeft from '../assets/icons/chevron-left.svg';
-import IconChevronRight from '../assets/icons/chevron-right.svg';
+// import IconPageFirst from '../assets/icons/page-first.svg';
+// import IconPageLast from '../assets/icons/page-last.svg';
+// import IconChevronLeft from '../assets/icons/chevron-left.svg';
+// import IconChevronRight from '../assets/icons/chevron-right.svg';
 
 export default defineComponent({
   name: 'VPagination',
-  components: { IconPageFirst, IconChevronLeft, IconChevronRight, IconPageLast, VPage },
+  components: { /* IconPageFirst, IconChevronLeft, IconChevronRight, IconPageLast, */ VPage },
   props: {
     pages: {
       type: Number,
@@ -75,6 +78,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    currentUrl: {
+      type: String,
+      default: ''
+    }
   },
   emits: ['update:modelValue'],
 
