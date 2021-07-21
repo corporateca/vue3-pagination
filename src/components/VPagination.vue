@@ -1,19 +1,43 @@
 <template>
   <ul class="Pagination">
-    <!-- <li v-if="!hideFirstButton" class="PaginationControl">
+    <li v-if="!hideFirstButton" class="PaginationControl">
+      <a
+        v-if="isPrevControlsActive"
+        :href="removeURLParameter(currentUrl, 'page')"
+        @click.prevent=""
+      >
+        <icon-page-first
+          class="Control"
+          :class="{ 'Control-active': isPrevControlsActive }"
+          @click="goToFirst"
+        />
+      </a>
+
       <icon-page-first
+        v-else
         class="Control"
         :class="{ 'Control-active': isPrevControlsActive }"
         @click="goToFirst"
       />
     </li>
+
     <li class="PaginationControl">
+      <a v-if="isPrevControlsActive" :key="prevKey" :href="prevHref" @click.prevent="prevKey++">
+        <icon-chevron-left
+          class="Control"
+          :class="{ 'Control-active': isPrevControlsActive }"
+          @click="goToPrev"
+        />
+      </a>
+
       <icon-chevron-left
+        v-else
         class="Control"
         :class="{ 'Control-active': isPrevControlsActive }"
         @click="goToPrev"
       />
-    </li> -->
+    </li>
+
     <v-page
       v-for="page in pagination"
       :key="`pagination-page-${page}`"
@@ -23,36 +47,52 @@
       :currentUrl="currentUrl"
       @update="updatePageHandler"
     />
-    <!-- <li class="PaginationControl">
+
+    <li class="PaginationControl">
+      <a v-if="isNextControlsActive" :key="nextKey" :href="nextHref" @click.prevent="nextKey++">
+        <icon-chevron-right
+          class="Control"
+          :class="{ 'Control-active': isNextControlsActive }"
+          @click="goToNext"
+        />
+      </a>
       <icon-chevron-right
+        v-else
         class="Control"
         :class="{ 'Control-active': isNextControlsActive }"
         @click="goToNext"
       />
     </li>
     <li v-if="!hideLastButton" class="PaginationControl">
+      <a v-if="isNextControlsActive" :href="currentUrl.replace(/(page=)[^\&]+/, '$1' + pages)" @click.prevent="">
+        <icon-page-last
+          class="Control"
+          :class="{ 'Control-active': isNextControlsActive }"
+          @click="goToLast"
+        />
+      </a>
+
       <icon-page-last
+        v-else
         class="Control"
         :class="{ 'Control-active': isNextControlsActive }"
         @click="goToLast"
       />
-    </li> -->
+    </li>
   </ul>
 </template>
-
-
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import VPage from './atoms/VPage.vue';
-// import IconPageFirst from '../assets/icons/page-first.svg';
-// import IconPageLast from '../assets/icons/page-last.svg';
-// import IconChevronLeft from '../assets/icons/chevron-left.svg';
-// import IconChevronRight from '../assets/icons/chevron-right.svg';
+import IconPageFirst from '../assets/icons/page-first.svg';
+import IconPageLast from '../assets/icons/page-last.svg';
+import IconChevronLeft from '../assets/icons/chevron-left.svg';
+import IconChevronRight from '../assets/icons/chevron-right.svg';
 
 export default defineComponent({
   name: 'VPagination',
-  components: { /* IconPageFirst, IconChevronLeft, IconChevronRight, IconPageLast, */ VPage },
+  components: { IconPageFirst, IconChevronLeft, IconChevronRight, IconPageLast, VPage },
   props: {
     pages: {
       type: Number,
@@ -80,10 +120,53 @@ export default defineComponent({
     },
     currentUrl: {
       type: String,
-      default: ''
-    }
+      default: '',
+    },
   },
   emits: ['update:modelValue'],
+
+  data() {
+    return {
+      prevKey: 0,
+      nextKey: 0,
+    };
+  },
+
+  computed: {
+    prevHref(): any {
+      if (this.modelValue != 2) {
+        return this.currentUrl.replace(/(page=)[^\&]+/, '$1' + (this.modelValue - 1));
+      } else {
+        return this.removeURLParameter(this.currentUrl, 'page');
+      }
+    },
+
+    nextHref(): any {
+      return this.currentUrl.replace(/(page=)[^\&]+/, '$1' + (this.modelValue + 1));
+    },
+  },
+
+  methods: {
+    removeURLParameter(url: any, parameter: any) {
+      //prefer to use l.search if you have a location/link object
+      const urlparts = url.split('?');
+      if (urlparts.length >= 2) {
+        const prefix = encodeURIComponent(parameter) + '=';
+        const pars = urlparts[1].split(/[&;]/g);
+
+        //reverse iteration as may be destructive
+        for (let i = pars.length; i-- > 0; ) {
+          //idiom for string.startsWith
+          if (pars[i].lastIndexOf(prefix, 0) !== -1) {
+            pars.splice(i, 1);
+          }
+        }
+
+        return urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : '');
+      }
+      return url;
+    },
+  },
 
   setup(props, { emit }) {
     // pagination
@@ -219,3 +302,5 @@ export default defineComponent({
   }
 }
 </style>
+
+
